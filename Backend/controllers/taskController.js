@@ -146,7 +146,27 @@ export const updateTask = async (req, res) => {
     task.description = req.body.description || task.description;
     task.priority = req.body.priority || task.priority;
     task.dueDate = req.body.dueDate || task.dueDate;
-    task.todoChecklist = req.body.todoChecklist || task.todoChecklist;
+    if (req.body.todoChecklist) {
+      task.todoChecklist = req.body.todoChecklist;
+      const totalItems = task.todoChecklist.length;
+      const completedItems = task.todoChecklist.filter(
+        (item) => item.completed
+      ).length;
+
+      task.progress = totalItems
+        ? Math.round((completedItems / totalItems) * 100)
+        : 0;
+
+      if (completedItems === totalItems && totalItems > 0) {
+        task.status = "Completed";
+      } else if (completedItems > 0) {
+        task.status = "In Progress";
+      } else {
+        task.status = req.body.status || "Pending";
+      }
+    } else if (req.body.status) {
+      task.status = req.body.status;
+    }
     task.attachments = req.body.attachments || task.attachments;
 
     if (req.body.assignedTo) {
