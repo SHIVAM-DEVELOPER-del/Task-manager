@@ -1,5 +1,7 @@
 import moment from "moment";
 
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const formatDate = (date) => (date ? moment(date).format("Do MMM YYYY") : "—");
 export const initials = (name = "User") => name.split(" ").map((word) => word[0]).slice(0, 2).join("").toUpperCase();
 export const taskProgress = (task) => {

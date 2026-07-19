@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { HiOutlineChartPie, HiOutlineClipboardDocumentList, HiOutlinePlusCircle, HiOutlineUsers, HiOutlineArrowRightOnRectangle } from "react-icons/hi2";
+import { HiOutlineChartPie, HiOutlineClipboardDocumentList, HiOutlinePlusCircle, HiOutlineUsers, HiOutlineArrowRightOnRectangle, HiOutlineBars3, HiOutlineXMark } from "react-icons/hi2";
 import { initials } from "../../utils/helper";
 
 const navItems = {
@@ -12,17 +13,60 @@ const navItems = {
 
 const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const role = user.role === "admin" ? "admin" : "member";
   const logout = () => { localStorage.clear(); navigate("/login"); };
+
+  const sidebarContent = (
+    <>
+      <div className="mb-9 text-center"><div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-violet-600 text-2xl font-bold text-white">{initials(user.name)}</div><span className="mt-3 inline-block rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold capitalize text-white">{role}</span><h2 className="mt-3 font-semibold">{user.name || "Guest User"}</h2><p className="truncate text-sm text-slate-500">{user.email || "Sign in to continue"}</p></div>
+      <nav className="space-y-2">{navItems[role].map(([label, to, Icon]) => <NavLink key={to} to={to} onClick={() => setIsSidebarOpen(false)} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"}`}><Icon className="text-xl" />{label}</NavLink>)}</nav>
+      <button onClick={logout} className="mt-8 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-600"><HiOutlineArrowRightOnRectangle className="text-xl" />Logout</button>
+    </>
+  );
+
   return <div className="min-h-screen bg-slate-50 text-slate-900">
-    <header className="sticky top-0 z-20 border-b border-slate-100 bg-white px-6 py-5"><span className="text-xl font-bold tracking-tight">Task Manager</span></header>
+    <header className="sticky top-0 z-20 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-5">
+      <span className="text-xl font-bold tracking-tight">Task Manager</span>
+      <button
+        onClick={() => setIsSidebarOpen(true)}
+        className="grid h-10 w-10 place-items-center rounded-lg text-slate-600 hover:bg-slate-50 lg:hidden"
+        aria-label="Open menu"
+      >
+        <HiOutlineBars3 className="text-2xl" />
+      </button>
+    </header>
     <div className="flex">
+      {/* Desktop sidebar */}
       <aside className="sticky top-[77px] hidden h-[calc(100vh-77px)] w-72 shrink-0 border-r border-slate-100 bg-white p-6 lg:block">
-        <div className="mb-9 text-center"><div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-blue-600 to-violet-600 text-2xl font-bold text-white">{initials(user.name)}</div><span className="mt-3 inline-block rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold capitalize text-white">{role}</span><h2 className="mt-3 font-semibold">{user.name || "Guest User"}</h2><p className="truncate text-sm text-slate-500">{user.email || "Sign in to continue"}</p></div>
-        <nav className="space-y-2">{navItems[role].map(([label, to, Icon]) => <NavLink key={to} to={to} className={({ isActive }) => `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${isActive ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50"}`}><Icon className="text-xl" />{label}</NavLink>)}</nav>
-        <button onClick={logout} className="mt-8 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-600"><HiOutlineArrowRightOnRectangle className="text-xl" />Logout</button>
+        {sidebarContent}
       </aside>
+
+      {/* Mobile backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Mobile slide-in sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-72 transform overflow-y-auto bg-white p-6 shadow-xl transition-transform duration-300 ease-in-out lg:hidden ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="mb-4 grid h-10 w-10 place-items-center rounded-lg text-slate-600 hover:bg-slate-50"
+          aria-label="Close menu"
+        >
+          <HiOutlineXMark className="text-2xl" />
+        </button>
+        {sidebarContent}
+      </aside>
+
       <main className="min-w-0 flex-1 p-5 sm:p-8">{children}</main>
     </div>
   </div>;

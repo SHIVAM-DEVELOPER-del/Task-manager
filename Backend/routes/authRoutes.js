@@ -5,6 +5,9 @@ import {
   loginUser,
   getUserProfile,
   updateUserProfile,
+  forgotPassword,
+  verifyOtp,
+  resetPassword,
 } from "../controllers/authController.js";
 
 import { protect } from "../middlewares/authMiddleware.js";
@@ -17,6 +20,11 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/profile", protect, getUserProfile);
 router.put("/profile", protect, updateUserProfile);
+
+// Forgot password (OTP-based) — 3 step flow
+router.post("/forgot-password", forgotPassword);
+router.post("/verify-otp", verifyOtp);
+router.post("/reset-password", resetPassword);
 
 // Upload Profile Image
 router.post(
